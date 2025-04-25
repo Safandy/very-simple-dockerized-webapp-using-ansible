@@ -1,0 +1,30 @@
+---
+
+- hosts: localhost
+  connection: local
+- name: "Automate running docker container with ansible"
+  hosts: localhost
+  tasks:
+  ##clean up
+    - name: stop running container
+      command: docker stop jonydev
+      ignore_errors: yes
+    - name: remove stopped container
+      command: docker rm jonydev
+      ignore_errors: yes  
+    - name: remove used image
+      command: docker rmi jonydev
+      ignore_errors: yes   
+    - name: Clean up unused Docker resources
+      command: docker system prune -f
+
+    - name: build docker image
+      command: docker build -t jonydev  .
+
+    - name: Tag and push image in parallel
+      shell: |
+        docker tag jonydev sandy962023/jonydev & \
+        docker push sandy962023/jonydev
+
+    - name: run docker container
+      command: docker run -d --name jonydev -p 5000:5000 jonydev
